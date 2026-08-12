@@ -21,5 +21,10 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+# Local runtime data & test artifacts — keep real inventory data out of the
+# build context (SQLite DBs, the .data dir, and local export archives).
+**/.data
+_import
+**/*.db
 README.md
 !Dockerfile.rootless
