@@ -1,11 +1,25 @@
 <template>
   <div v-if="!inline" class="flex w-full flex-col">
     <Label class="cursor-pointer"> {{ label }} </Label>
-    <VueDatePicker v-model="selected" :enable-time-picker="false" clearable :dark="isDark" :format="formatDate" />
+    <VueDatePicker
+      v-model="selected"
+      :enable-time-picker="false"
+      clearable
+      :teleport="true"
+      :dark="isDark"
+      :format="formatDate"
+    />
   </div>
   <div v-else class="sm:flex sm:items-start sm:gap-4">
     <Label class="flex w-full cursor-pointer px-1 py-2"> {{ label }} </Label>
-    <VueDatePicker v-model="selected" :enable-time-picker="false" clearable :dark="isDark" :format="formatDate" />
+    <VueDatePicker
+      v-model="selected"
+      :enable-time-picker="false"
+      clearable
+      :teleport="true"
+      :dark="isDark"
+      :format="formatDate"
+    />
   </div>
 </template>
 
