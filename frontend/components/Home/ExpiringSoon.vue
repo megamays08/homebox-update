@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import Subtitle from "~/components/global/Subtitle.vue";
   import BaseCard from "@/components/Base/Card.vue";
-  import type { MaintenanceFilterStatus } from "~~/lib/api/types/data-contracts";
+  import { MaintenanceFilterStatus } from "~~/lib/api/types/data-contracts";
 
   const api = useUserApi();
 
@@ -31,7 +31,7 @@
       // and scheduled-but-not-completed maintenance, merged into one feed.
       const [expiring, maintenance] = await Promise.all([
         api.items.fields.expiring(windowDays.value),
-        api.maintenance.getAll({ status: "scheduled" as MaintenanceFilterStatus }),
+        api.maintenance.getAll({ status: MaintenanceFilterStatus.MaintenanceFilterStatusScheduled }),
       ]);
 
       const out: Row[] = [];
@@ -41,11 +41,13 @@
       }
 
       for (const m of maintenance.data ?? []) {
+        // scheduledDate is a date-only "YYYY-MM-DD" string over the wire.
+        const sd = typeof m.scheduledDate === "string" ? m.scheduledDate : "";
         // Keep scheduled tasks that are due within the window or overdue.
-        if (!m.scheduledDate || daysUntil(m.scheduledDate) > windowDays.value) {
+        if (!sd || daysUntil(sd) > windowDays.value) {
           continue;
         }
-        out.push({ itemId: m.itemID, itemName: m.itemName, label: m.name, date: m.scheduledDate, kind: "maintenance" });
+        out.push({ itemId: m.itemID, itemName: m.itemName, label: m.name, date: sd, kind: "maintenance" });
       }
 
       // YYYY-MM-DD sorts correctly as a plain string (soonest / most-overdue first).
@@ -108,19 +110,29 @@
         Nothing due in the next {{ windowDays }} days.
       </p>
       <ul v-else class="divide-y">
-        <li v-for="(row, i) in rows" :key="`${row.itemId}-${i}`" class="flex items-center justify-between gap-3 px-4 py-3">
+        <li
+          v-for="(row, i) in rows"
+          :key="`${row.itemId}-${i}`"
+          class="flex items-center justify-between gap-3 px-4 py-3"
+        >
           <div class="min-w-0">
             <NuxtLink :to="`/item/${row.itemId}`" class="block truncate font-medium hover:underline">
               {{ row.itemName }}
             </NuxtLink>
             <span class="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span class="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide" :class="kindClass(row.kind)">
+              <span
+                class="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+                :class="kindClass(row.kind)"
+              >
                 {{ row.kind === "maintenance" ? "Maint" : "Exp" }}
               </span>
               {{ row.label }} · {{ row.date }}
             </span>
           </div>
-          <span class="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium" :class="urgencyClass(daysUntil(row.date))">
+          <span
+            class="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium"
+            :class="urgencyClass(daysUntil(row.date))"
+          >
             {{ relativeLabel(daysUntil(row.date)) }}
           </span>
         </li>
