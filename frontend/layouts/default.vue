@@ -226,6 +226,10 @@
               />
               ~
               <span v-html="DOMPurify.sanitize($t('global.footer.api_link'))" />
+              ~
+              <a href="https://github.com/megamays08/homebox-update" target="_blank" rel="noopener" class="underline">
+                Fork
+              </a>
             </p>
           </footer>
         </div>
